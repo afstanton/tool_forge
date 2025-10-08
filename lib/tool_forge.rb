@@ -9,5 +9,8 @@ require_relative 'tool_forge/version'
 
 module ToolForge
   class Error < StandardError; end
-  # Your code goes here...
+
+  def self.define(name, &)
+    ToolDefinition.new(name, &)
+  end
 end
