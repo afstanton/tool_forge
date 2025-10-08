@@ -154,6 +154,57 @@ RSpec.describe ToolForge::ToolDefinition, '#to_ruby_llm_tool' do
       expect(result).to eq('FORMATTED: PROCESSED: test')
     end
 
+    it 'makes class helper methods available as class methods' do
+      tool = described_class.new(:docker_tool) do
+        description 'A tool with class helper methods'
+        param :file_path, type: :string
+        param :container_id, type: :string
+
+        class_helper(:add_to_tar) do |file_path, tar_path|
+          "Added #{file_path} to tar as #{tar_path}"
+        end
+
+        execute do |file_path:, container_id:|
+          # Call the class method
+          tar_result = self.class.add_to_tar(file_path, "/app/#{File.basename(file_path)}")
+          "Copied to container #{container_id}: #{tar_result}"
+        end
+      end
+
+      tool_class = tool.to_ruby_llm_tool
+      instance = tool_class.new
+
+      result = instance.execute(file_path: '/local/file.txt', container_id: 'abc123')
+      expect(result).to eq('Copied to container abc123: Added /local/file.txt to tar as /app/file.txt')
+    end
+
+    it 'supports both class and instance helper methods together' do
+      tool = described_class.new(:complex_tool) do
+        description 'A tool with both types of helper methods'
+        param :data, type: :string
+
+        helper(:format_data) do |data|
+          "FORMATTED: #{data}"
+        end
+
+        class_helper(:process_static) do |input|
+          "STATIC: #{input}"
+        end
+
+        execute do |data:|
+          formatted = format_data(data)
+          static = self.class.process_static(data)
+          "#{formatted} + #{static}"
+        end
+      end
+
+      tool_class = tool.to_ruby_llm_tool
+      instance = tool_class.new
+
+      result = instance.execute(data: 'test')
+      expect(result).to eq('FORMATTED: test + STATIC: test')
+    end
+
     it 'works with tools that have no helper methods' do
       tool = described_class.new(:simple_tool) do
         description 'A simple tool without helpers'

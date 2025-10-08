@@ -100,8 +100,8 @@ RSpec.describe ToolForge::ToolDefinition do
         helper(:add_prefix) { |text| "PREFIX: #{text}" }
       end
 
-      expect(tool.helper_methods).to have_key(:add_prefix)
-      expect(tool.helper_methods[:add_prefix]).to be_a(Proc)
+      expect(tool.helper_methods[:instance]).to have_key(:add_prefix)
+      expect(tool.helper_methods[:instance][:add_prefix]).to be_a(Proc)
     end
 
     it 'can store multiple helper methods' do
@@ -110,9 +110,9 @@ RSpec.describe ToolForge::ToolDefinition do
         helper(:add_suffix) { |text| "#{text} :SUFFIX" }
       end
 
-      expect(tool.helper_methods).to have_key(:add_prefix)
-      expect(tool.helper_methods).to have_key(:add_suffix)
-      expect(tool.helper_methods.size).to eq(2)
+      expect(tool.helper_methods[:instance]).to have_key(:add_prefix)
+      expect(tool.helper_methods[:instance]).to have_key(:add_suffix)
+      expect(tool.helper_methods[:instance].size).to eq(2)
     end
 
     it 'allows helper methods to be called within execute block context' do
@@ -126,8 +126,31 @@ RSpec.describe ToolForge::ToolDefinition do
 
       # For this test we can verify the helper is stored,
       # actual execution context testing will be in the conversion tests
-      expect(tool.helper_methods[:format_message]).to be_a(Proc)
+      expect(tool.helper_methods[:instance][:format_message]).to be_a(Proc)
       expect(tool.execute_block).to be_a(Proc)
+    end
+  end
+
+  describe '#class_helper' do
+    it 'stores class helper methods' do
+      tool = described_class.new(:my_tool) do
+        class_helper(:add_to_tar) { |file_path, tar_path| "Added #{file_path} to #{tar_path}" }
+      end
+
+      expect(tool.helper_methods[:class]).to have_key(:add_to_tar)
+      expect(tool.helper_methods[:class][:add_to_tar]).to be_a(Proc)
+    end
+
+    it 'can store both class and instance helper methods' do
+      tool = described_class.new(:my_tool) do
+        helper(:format_data) { |data| "FORMATTED: #{data}" }
+        class_helper(:add_to_tar) { |file_path, tar_path| "Added #{file_path} to #{tar_path}" }
+      end
+
+      expect(tool.helper_methods[:instance]).to have_key(:format_data)
+      expect(tool.helper_methods[:class]).to have_key(:add_to_tar)
+      expect(tool.helper_methods[:instance].size).to eq(1)
+      expect(tool.helper_methods[:class].size).to eq(1)
     end
   end
 
@@ -183,9 +206,9 @@ RSpec.describe ToolForge::ToolDefinition do
       expect(tool.name).to eq(:file_processor)
       expect(tool.description).to eq('Processes files with helper methods')
       expect(tool.params.size).to eq(2)
-      expect(tool.helper_methods.size).to eq(2)
-      expect(tool.helper_methods).to have_key(:add_to_tar)
-      expect(tool.helper_methods).to have_key(:compress_data)
+      expect(tool.helper_methods[:instance].size).to eq(2)
+      expect(tool.helper_methods[:instance]).to have_key(:add_to_tar)
+      expect(tool.helper_methods[:instance]).to have_key(:compress_data)
     end
   end
 end
