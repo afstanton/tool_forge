@@ -229,6 +229,54 @@ RSpec.describe ToolForge::ToolDefinition, '#to_mcp_tool' do
       expect(parsed_result['processed_files'].first['processed']).to be true
     end
 
+    it 'makes class helper methods available in the execute block' do
+      tool = described_class.new(:docker_mcp_tool) do
+        description 'A tool with class helper methods for MCP'
+        param :file_path, type: :string
+        param :container_id, type: :string
+
+        class_helper(:add_to_tar) do |file_path, tar_path|
+          "Added #{file_path} to tar as #{tar_path}"
+        end
+
+        execute do |file_path:, container_id:|
+          # Access class method through the helper class
+          tar_result = self.class.add_to_tar(file_path, "/app/#{File.basename(file_path)}")
+          "Copied to container #{container_id}: #{tar_result}"
+        end
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil, file_path: '/local/file.txt', container_id: 'abc123')
+      expected_text = 'Copied to container abc123: Added /local/file.txt to tar as /app/file.txt'
+      expect(result.content.first[:text]).to eq(expected_text)
+    end
+
+    it 'supports both class and instance helper methods together in MCP' do
+      tool = described_class.new(:complex_mcp_tool) do
+        description 'A tool with both types of helper methods for MCP'
+        param :data, type: :string
+
+        helper(:format_data) do |data|
+          "FORMATTED: #{data}"
+        end
+
+        class_helper(:process_static) do |input|
+          "STATIC: #{input}"
+        end
+
+        execute do |data:|
+          formatted = format_data(data)
+          static = self.class.process_static(data)
+          "#{formatted} + #{static}"
+        end
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil, data: 'test')
+      expect(result.content.first[:text]).to eq('FORMATTED: test + STATIC: test')
+    end
+
     it 'works with tools that have no helper methods' do
       tool = described_class.new(:simple_tool) do
         description 'A simple tool without helpers'

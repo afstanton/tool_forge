@@ -9,7 +9,7 @@ module ToolForge
       @description = nil
       @params = []
       @execute_block = nil
-      @helper_methods = {}
+      @helper_methods = { instance: {}, class: {} }
 
       instance_eval(&) if block_given?
     end
@@ -37,7 +37,11 @@ module ToolForge
     end
 
     def helper(method_name, &block)
-      @helper_methods[method_name] = block
+      @helper_methods[:instance][method_name] = block
+    end
+
+    def class_helper(method_name, &block)
+      @helper_methods[:class][method_name] = block
     end
 
     def to_ruby_llm_tool
@@ -53,9 +57,14 @@ module ToolForge
           param param_def[:name], type: param_def[:type], desc: param_def[:description]
         end
 
-        # Add helper methods
-        definition.helper_methods.each do |method_name, method_block|
+        # Add instance helper methods
+        definition.helper_methods[:instance].each do |method_name, method_block|
           define_method(method_name, &method_block)
+        end
+
+        # Add class helper methods
+        definition.helper_methods[:class].each do |method_name, method_block|
+          define_singleton_method(method_name, &method_block)
         end
 
         define_method(:execute) do |**args|
@@ -95,8 +104,13 @@ module ToolForge
 
         # Create a helper object that contains all the helper methods
         helper_class = Class.new do
-          definition.helper_methods.each do |method_name, method_block|
+          definition.helper_methods[:instance].each do |method_name, method_block|
             define_method(method_name, &method_block)
+          end
+
+          # Class methods are defined as singleton methods on the class itself
+          definition.helper_methods[:class].each do |method_name, method_block|
+            define_singleton_method(method_name, &method_block)
           end
         end
 
@@ -105,6 +119,7 @@ module ToolForge
           helper_instance = helper_class.new
 
           # Execute the block in the context of the helper instance so helper methods are available
+          # For class methods, they'll be available on the helper_class itself
           result = helper_instance.instance_exec(**args, &definition.execute_block)
 
           # Smart formatting for different return types
