@@ -84,7 +84,18 @@ module ToolForge
 
         define_singleton_method(:call) do |server_context:, **args|
           result = definition.execute_block.call(**args)
-          MCP::Tool::Response.new([{ type: 'text', text: result.to_s }])
+
+          # Smart formatting for different return types
+          result_text = case result
+                        when String
+                          result
+                        when Hash, Array
+                          JSON.pretty_generate(result)
+                        else
+                          result.to_s
+                        end
+
+          MCP::Tool::Response.new([{ type: 'text', text: result_text }])
         end
       end
     end

@@ -134,4 +134,52 @@ RSpec.describe ToolForge::ToolDefinition, '#to_mcp_tool' do
     expect(schema[:properties]['arr'][:type]).to eq('array')
     expect(schema[:properties]['obj'][:type]).to eq('object')
   end
+
+  describe 'return value formatting' do
+    it 'returns strings as-is' do
+      tool = described_class.new(:string_tool) do
+        description 'Returns a string'
+        execute { 'Hello, World!' }
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil)
+      expect(result.content.first[:text]).to eq('Hello, World!')
+    end
+
+    it 'formats hashes as pretty JSON' do
+      tool = described_class.new(:hash_tool) do
+        description 'Returns a hash'
+        execute { { name: 'Alice', age: 30 } }
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil)
+      parsed = JSON.parse(result.content.first[:text])
+      expect(parsed).to eq('name' => 'Alice', 'age' => 30)
+    end
+
+    it 'formats arrays as pretty JSON' do
+      tool = described_class.new(:array_tool) do
+        description 'Returns an array'
+        execute { [1, 2, 3, 4, 5] }
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil)
+      parsed = JSON.parse(result.content.first[:text])
+      expect(parsed).to eq([1, 2, 3, 4, 5])
+    end
+
+    it 'converts other objects to strings' do
+      tool = described_class.new(:number_tool) do
+        description 'Returns a number'
+        execute { 42 }
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil)
+      expect(result.content.first[:text]).to eq('42')
+    end
+  end
 end
