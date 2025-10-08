@@ -2,13 +2,14 @@
 
 module ToolForge
   class ToolDefinition
-    attr_reader :name, :params, :execute_block
+    attr_reader :name, :params, :execute_block, :helper_methods
 
     def initialize(name, &)
       @name = name
       @description = nil
       @params = []
       @execute_block = nil
+      @helper_methods = {}
 
       instance_eval(&) if block_given?
     end
@@ -35,6 +36,10 @@ module ToolForge
       @execute_block = block
     end
 
+    def helper(method_name, &block)
+      @helper_methods[method_name] = block
+    end
+
     def to_ruby_llm_tool
       raise LoadError, 'RubyLLM is not loaded. Please require "ruby_llm" first.' unless defined?(RubyLLM::Tool)
       raise LoadError, 'RubyLLM is not loaded. Please require "ruby_llm" first.' if RubyLLM::Tool.nil?
@@ -48,8 +53,14 @@ module ToolForge
           param param_def[:name], type: param_def[:type], desc: param_def[:description]
         end
 
+        # Add helper methods
+        definition.helper_methods.each do |method_name, method_block|
+          define_method(method_name, &method_block)
+        end
+
         define_method(:execute) do |**args|
-          definition.execute_block.call(**args)
+          # Execute the block in the context of this instance so helper methods are available
+          instance_exec(**args, &definition.execute_block)
         end
       end
     end
@@ -82,8 +93,19 @@ module ToolForge
           required: required_params
         )
 
+        # Create a helper object that contains all the helper methods
+        helper_class = Class.new do
+          definition.helper_methods.each do |method_name, method_block|
+            define_method(method_name, &method_block)
+          end
+        end
+
         define_singleton_method(:call) do |server_context:, **args|
-          result = definition.execute_block.call(**args)
+          # Create an instance of the helper class to provide context for helper methods
+          helper_instance = helper_class.new
+
+          # Execute the block in the context of the helper instance so helper methods are available
+          result = helper_instance.instance_exec(**args, &definition.execute_block)
 
           # Smart formatting for different return types
           result_text = case result
