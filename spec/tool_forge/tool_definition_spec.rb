@@ -94,6 +94,43 @@ RSpec.describe ToolForge::ToolDefinition do
     end
   end
 
+  describe '#helper' do
+    it 'stores helper methods' do
+      tool = described_class.new(:my_tool) do
+        helper(:add_prefix) { |text| "PREFIX: #{text}" }
+      end
+
+      expect(tool.helper_methods).to have_key(:add_prefix)
+      expect(tool.helper_methods[:add_prefix]).to be_a(Proc)
+    end
+
+    it 'can store multiple helper methods' do
+      tool = described_class.new(:my_tool) do
+        helper(:add_prefix) { |text| "PREFIX: #{text}" }
+        helper(:add_suffix) { |text| "#{text} :SUFFIX" }
+      end
+
+      expect(tool.helper_methods).to have_key(:add_prefix)
+      expect(tool.helper_methods).to have_key(:add_suffix)
+      expect(tool.helper_methods.size).to eq(2)
+    end
+
+    it 'allows helper methods to be called within execute block context' do
+      tool = described_class.new(:my_tool) do
+        helper(:format_message) { |name| "Hello, #{name}!" }
+
+        execute do |name:|
+          format_message(name)
+        end
+      end
+
+      # For this test we can verify the helper is stored,
+      # actual execution context testing will be in the conversion tests
+      expect(tool.helper_methods[:format_message]).to be_a(Proc)
+      expect(tool.execute_block).to be_a(Proc)
+    end
+  end
+
   describe 'complete tool definition' do
     it 'can define a complete tool with all features' do
       tool = described_class.new(:greet_user) do
@@ -114,6 +151,41 @@ RSpec.describe ToolForge::ToolDefinition do
       expect(tool.description).to eq('Greets a user by name')
       expect(tool.params.size).to eq(3)
       expect(tool.execute_block.call(name: 'Alice', enthusiastic: true)).to eq('Hello, Alice!')
+    end
+
+    it 'can define a tool with helper methods' do
+      tool = described_class.new(:file_processor) do
+        description 'Processes files with helper methods'
+
+        param :filename, type: :string, description: 'File to process'
+        param :operation, type: :string, description: 'Operation to perform'
+
+        helper(:add_to_tar) do |file_path, content|
+          "TAR: #{file_path} -> #{content}"
+        end
+
+        helper(:compress_data) do |data|
+          "COMPRESSED: #{data}"
+        end
+
+        execute do |filename:, operation:|
+          case operation
+          when 'tar'
+            add_to_tar(filename, 'file content')
+          when 'compress'
+            compress_data(filename)
+          else
+            "Unknown operation: #{operation}"
+          end
+        end
+      end
+
+      expect(tool.name).to eq(:file_processor)
+      expect(tool.description).to eq('Processes files with helper methods')
+      expect(tool.params.size).to eq(2)
+      expect(tool.helper_methods.size).to eq(2)
+      expect(tool.helper_methods).to have_key(:add_to_tar)
+      expect(tool.helper_methods).to have_key(:compress_data)
     end
   end
 end

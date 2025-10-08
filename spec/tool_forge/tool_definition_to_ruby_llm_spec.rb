@@ -102,4 +102,71 @@ RSpec.describe ToolForge::ToolDefinition, '#to_ruby_llm_tool' do
       metadata: { key: 'value' }
     )
   end
+
+  describe 'helper methods' do
+    it 'makes helper methods available as instance methods' do
+      tool = described_class.new(:helper_tool) do
+        description 'A tool with helper methods'
+        param :text, type: :string
+
+        helper(:add_prefix) { |str| "PREFIX: #{str}" }
+        helper(:add_suffix) { |str| "#{str} :SUFFIX" }
+
+        execute do |text:|
+          prefixed = add_prefix(text)
+          add_suffix(prefixed)
+        end
+      end
+
+      tool_class = tool.to_ruby_llm_tool
+      instance = tool_class.new
+
+      # Test that helper methods are available as instance methods
+      expect(instance.respond_to?(:add_prefix)).to be true
+      expect(instance.respond_to?(:add_suffix)).to be true
+
+      # Test that they work correctly
+      expect(instance.add_prefix('Hello')).to eq('PREFIX: Hello')
+      expect(instance.add_suffix('World')).to eq('World :SUFFIX')
+
+      # Test the full execution
+      result = instance.execute(text: 'Hello')
+      expect(result).to eq('PREFIX: Hello :SUFFIX')
+    end
+
+    it 'helper methods can access other helper methods' do
+      tool = described_class.new(:complex_helper_tool) do
+        description 'A tool with interdependent helper methods'
+        param :data, type: :string
+
+        helper(:format_data) { |str| "FORMATTED: #{str}" }
+        helper(:process_data) { |str| format_data("PROCESSED: #{str}") }
+
+        execute do |data:|
+          process_data(data)
+        end
+      end
+
+      tool_class = tool.to_ruby_llm_tool
+      instance = tool_class.new
+
+      result = instance.execute(data: 'test')
+      expect(result).to eq('FORMATTED: PROCESSED: test')
+    end
+
+    it 'works with tools that have no helper methods' do
+      tool = described_class.new(:simple_tool) do
+        description 'A simple tool without helpers'
+        param :name, type: :string
+
+        execute { |name:| "Hello, #{name}!" }
+      end
+
+      tool_class = tool.to_ruby_llm_tool
+      instance = tool_class.new
+
+      result = instance.execute(name: 'World')
+      expect(result).to eq('Hello, World!')
+    end
+  end
 end

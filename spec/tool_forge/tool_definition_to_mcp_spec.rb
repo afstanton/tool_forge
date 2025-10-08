@@ -182,4 +182,64 @@ RSpec.describe ToolForge::ToolDefinition, '#to_mcp_tool' do
       expect(result.content.first[:text]).to eq('42')
     end
   end
+
+  describe 'helper methods' do
+    it 'makes helper methods available in the execute block' do
+      tool = described_class.new(:helper_tool) do
+        description 'A tool with helper methods'
+        param :text, type: :string
+
+        helper(:add_prefix) { |str| "PREFIX: #{str}" }
+        helper(:add_suffix) { |str| "#{str} :SUFFIX" }
+
+        execute do |text:|
+          prefixed = add_prefix(text)
+          add_suffix(prefixed)
+        end
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil, text: 'Hello')
+      expect(result.content.first[:text]).to eq('PREFIX: Hello :SUFFIX')
+    end
+
+    it 'helper methods can access parameters and return complex data' do
+      tool = described_class.new(:complex_helper_tool) do
+        description 'A tool with complex helper methods'
+        param :files, type: :array
+        param :operation, type: :string
+
+        helper(:process_file) do |filename, op|
+          { file: filename, operation: op, processed: true }
+        end
+
+        execute do |files:, operation:|
+          results = files.map { |file| process_file(file, operation) }
+          { processed_files: results, total: results.size }
+        end
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil, files: ['file1.txt', 'file2.txt'], operation: 'compress')
+
+      parsed_result = JSON.parse(result.content.first[:text])
+      expect(parsed_result['total']).to eq(2)
+      expect(parsed_result['processed_files'].first['file']).to eq('file1.txt')
+      expect(parsed_result['processed_files'].first['operation']).to eq('compress')
+      expect(parsed_result['processed_files'].first['processed']).to be true
+    end
+
+    it 'works with tools that have no helper methods' do
+      tool = described_class.new(:simple_tool) do
+        description 'A simple tool without helpers'
+        param :name, type: :string
+
+        execute { |name:| "Hello, #{name}!" }
+      end
+
+      tool_class = tool.to_mcp_tool
+      result = tool_class.call(server_context: nil, name: 'World')
+      expect(result.content.first[:text]).to eq('Hello, World!')
+    end
+  end
 end
