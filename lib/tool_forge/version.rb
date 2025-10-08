@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
 module ToolForge
-  VERSION = '0.0.5'
+  # The current version of the ToolForge gem
+  VERSION = '0.2.0'
 end
