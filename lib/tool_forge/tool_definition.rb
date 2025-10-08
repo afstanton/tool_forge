@@ -34,5 +34,59 @@ module ToolForge
     def execute(&block)
       @execute_block = block
     end
+
+    def to_ruby_llm_tool
+      raise LoadError, 'RubyLLM is not loaded. Please require "ruby_llm" first.' unless defined?(RubyLLM::Tool)
+      raise LoadError, 'RubyLLM is not loaded. Please require "ruby_llm" first.' if RubyLLM::Tool.nil?
+
+      definition = self
+
+      Class.new(RubyLLM::Tool) do
+        description definition.description
+
+        definition.params.each do |param_def|
+          param param_def[:name], type: param_def[:type], desc: param_def[:description]
+        end
+
+        define_method(:execute) do |**args|
+          definition.execute_block.call(**args)
+        end
+      end
+    end
+
+    def to_mcp_tool
+      raise LoadError, 'MCP SDK is not loaded. Please require "mcp" first.' unless defined?(MCP::Tool)
+      raise LoadError, 'MCP SDK is not loaded. Please require "mcp" first.' if MCP::Tool.nil?
+
+      definition = self
+
+      Class.new(MCP::Tool) do
+        description definition.description
+
+        # Build properties hash for input schema
+        properties = {}
+        required_params = []
+
+        definition.params.each do |param_def|
+          prop = {
+            type: param_def[:type].to_s
+          }
+          prop[:description] = param_def[:description] if param_def[:description]
+
+          properties[param_def[:name].to_s] = prop
+          required_params << param_def[:name].to_s if param_def[:required]
+        end
+
+        input_schema(
+          properties: properties,
+          required: required_params
+        )
+
+        define_singleton_method(:call) do |server_context:, **args|
+          result = definition.execute_block.call(**args)
+          MCP::Tool::Response.new([{ type: 'text', text: result.to_s }])
+        end
+      end
+    end
   end
 end

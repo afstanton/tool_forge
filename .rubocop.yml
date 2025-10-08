@@ -6,6 +6,9 @@ AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
 
+Lint/UnusedBlockArgument:
+  AllowUnusedKeywordArguments: true
+
 Lint/UnusedMethodArgument:
   AllowUnusedKeywordArguments: true
 
