@@ -1,0 +1,67 @@
+---
+- - :permit
+  - MIT
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 17:59:01.412285000 Z
+- - :permit
+  - Apache 2.0
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 17:59:29.811179000 Z
+- - :permit
+  - ruby
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 17:59:49.409075000 Z
+- - :permit
+  - Simplified BSD
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 18:00:06.130812000 Z
+- - :permit
+  - Copyright 2025 Aaron F Stanton
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 18:00:27.458223000 Z
+- - :permit
+  - ISC
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 18:00:44.097023000 Z
+- - :permit
+  - New BSD
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 18:01:03.583512000 Z
+- - :permit
+  - Brakeman Public Use License
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 18:01:21.471660000 Z
+- - :permit
+  - GPL-3.0-or-later
+  - :who:
+    :why:
+    :versions: []
+    :when: 2025-12-01 18:01:40.316229000 Z
+- - :permit
+  - Copyright 2026 Aaron F Stanton
+  - :who:
+    :why:
+    :versions: []
+    :when: 2026-01-20 15:33:41.864591000 Z
+- - :permit
+  - LGPL
+  - :who:
+    :why:
+    :versions: []
+    :when: 2026-01-22 19:15:39.726136000 Z
