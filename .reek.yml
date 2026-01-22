@@ -1,0 +1,52 @@
+---
+detectors:
+  BooleanParameter:
+    enabled: false
+
+  ControlParameter:
+    enabled: false
+
+  DataClump:
+    enabled: false
+
+  DuplicateMethodCall:
+    enabled: false
+
+  FeatureEnvy:
+    enabled: false
+
+  InstanceVariableAssumption:
+    enabled: false
+
+  IrresponsibleModule:
+    enabled: false
+
+  LongParameterList:
+    enabled: false
+
+  ManualDispatch:
+    enabled: false
+
+  MissingSafeMethod:
+    enabled: false
+
+  NestedIterators:
+    enabled: false
+
+  NilCheck:
+    enabled: false
+
+  TooManyMethods:
+    enabled: false
+
+  TooManyInstanceVariables:
+    enabled: false
+
+  TooManyStatements:
+    enabled: false
+
+  UncommunicativeVariableName:
+    enabled: false
+
+  UtilityFunction:
+    enabled: false

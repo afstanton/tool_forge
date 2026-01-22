@@ -1,16 +1,20 @@
 plugins:
+  - rubocop-capybara
+  - rubocop-factory_bot
+  - rubocop-faker
+  - rubocop-performance
+  - rubocop-rails
   - rubocop-rake
   - rubocop-rspec
+  - rubocop-rspec_rails
+  - rubocop-thread_safety
 
 AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
 
-Lint/UnusedBlockArgument:
-  AllowUnusedKeywordArguments: true
-
 Lint/UnusedMethodArgument:
-  AllowUnusedKeywordArguments: true
+  Enabled: false
 
 Metrics/AbcSize:
   Enabled: false
@@ -18,23 +22,66 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Enabled: false
 
-Metrics/CyclomaticComplexity:
+Metrics/ClassLength:
   Enabled: false
 
-Metrics/PerceivedComplexity:
+Metrics/CyclomaticComplexity:
   Enabled: false
 
 Metrics/MethodLength:
   Enabled: false
 
+Metrics/ModuleLength:
+  Enabled: false
+
 Metrics/ParameterLists:
   Enabled: false
 
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Rails/Delegate:
+  Enabled: false
+
+Rails/FilePath:
+  EnforcedStyle: arguments
+
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Rails/RedundantPresenceValidationOnBelongsTo:
+  Enabled: false
+
+Rails/SkipsModelValidations:
+  Exclude:
+    - 'spec/dummy/db/migrate/*_add_pay_sti_columns.pay.rb'
+    - 'db/migrate/*_add_pay_sti_columns.pay.rb'
+
+Rails/ThreeStateBooleanColumn:
+  Exclude:
+    - 'spec/dummy/db/migrate/*_create_pay_tables.pay.rb'
+    - 'db/migrate/*_create_pay_tables.pay.rb'
+
 RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/IndexedLet:
   Enabled: false
 
 RSpec/MultipleExpectations:
   Enabled: false
 
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpecRails/InferredSpecType:
+  Enabled: false
+
 Style/Documentation:
+  Enabled: false
+
+Style/MultilineBlockChain:
+  Enabled: false
+
+ThreadSafety/ClassInstanceVariable:
   Enabled: false
