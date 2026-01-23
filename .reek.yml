@@ -48,5 +48,8 @@ detectors:
   UncommunicativeVariableName:
     enabled: false
 
+  UnusedParameters:
+    enabled: false
+
   UtilityFunction:
     enabled: false

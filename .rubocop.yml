@@ -83,5 +83,9 @@ Style/Documentation:
 Style/MultilineBlockChain:
   Enabled: false
 
+Style/OpenStructUse:
+  Exclude:
+    - 'spec/**/*'
+
 ThreadSafety/ClassInstanceVariable:
   Enabled: false
