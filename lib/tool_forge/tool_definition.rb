@@ -248,6 +248,7 @@ module ToolForge
           end
         end
 
+        # rubocop:disable Lint/UnusedBlockArgument
         define_singleton_method(:call) do |server_context:, **args|
           # Create an instance of the helper class to provide context for helper methods
           helper_instance = helper_class.new
@@ -268,6 +269,7 @@ module ToolForge
 
           MCP::Tool::Response.new([{ type: 'text', text: result_text }])
         end
+        # rubocop:enable Lint/UnusedBlockArgument
       end
     end
   end
