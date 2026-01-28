@@ -2,8 +2,13 @@
 
 require 'simplecov'
 
-SimpleCov.start do
+SimpleCov.start 'rails' do
+  # NOTE: ViewComponent compiles templates via class_eval; with Ruby 4 + PRISM
+  # and branch coverage for eval, this can segfault. So we disable it here.
+  # enable_coverage_for_eval
+
   enable_coverage :branch
+  primary_coverage :branch
 end
 
 require 'tool_forge'

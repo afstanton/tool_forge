@@ -47,15 +47,15 @@ RSpec.describe ToolForge::ToolDefinition, '#to_mcp_tool' do
     tool_class = tool.to_mcp_tool
     schema = tool_class.input_schema.to_h
 
-    expect(schema[:properties]).to have_key('name')
-    expect(schema[:properties]['name'][:type]).to eq('string')
-    expect(schema[:properties]['name'][:description]).to eq('User name')
+    expect(schema[:properties]).to have_key(:name)
+    expect(schema[:properties][:name][:type]).to eq('string')
+    expect(schema[:properties][:name][:description]).to eq('User name')
 
-    expect(schema[:properties]).to have_key('age')
-    expect(schema[:properties]['age'][:type]).to eq('integer')
-    expect(schema[:properties]['age'][:description]).to eq('User age')
+    expect(schema[:properties]).to have_key(:age)
+    expect(schema[:properties][:age][:type]).to eq('integer')
+    expect(schema[:properties][:age][:description]).to eq('User age')
 
-    expect(schema[:required]).to eq([:name])
+    expect(schema[:required]).to eq(['name'])
   end
 
   it 'creates a call method that executes the block' do
@@ -107,9 +107,9 @@ RSpec.describe ToolForge::ToolDefinition, '#to_mcp_tool' do
     tool_class = tool.to_mcp_tool
     schema = tool_class.input_schema.to_h
 
-    expect(schema[:properties]['name'][:type]).to eq('string')
-    expect(schema[:properties]['count'][:type]).to eq('integer')
-    expect(schema[:properties]['active'][:type]).to eq('boolean')
+    expect(schema[:properties][:name][:type]).to eq('string')
+    expect(schema[:properties][:count][:type]).to eq('integer')
+    expect(schema[:properties][:active][:type]).to eq('boolean')
 
     result = tool_class.call(server_context: nil, name: 'test', count: 5, active: true)
     expect(result).to be_a(MCP::Tool::Response)
@@ -128,11 +128,11 @@ RSpec.describe ToolForge::ToolDefinition, '#to_mcp_tool' do
     tool_class = tool.to_mcp_tool
     schema = tool_class.input_schema.to_h
 
-    expect(schema[:properties]['str'][:type]).to eq('string')
-    expect(schema[:properties]['int'][:type]).to eq('integer')
-    expect(schema[:properties]['bool'][:type]).to eq('boolean')
-    expect(schema[:properties]['arr'][:type]).to eq('array')
-    expect(schema[:properties]['obj'][:type]).to eq('object')
+    expect(schema[:properties][:str][:type]).to eq('string')
+    expect(schema[:properties][:int][:type]).to eq('integer')
+    expect(schema[:properties][:bool][:type]).to eq('boolean')
+    expect(schema[:properties][:arr][:type]).to eq('array')
+    expect(schema[:properties][:obj][:type]).to eq('object')
   end
 
   describe 'return value formatting' do
