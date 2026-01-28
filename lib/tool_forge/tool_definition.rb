@@ -231,10 +231,10 @@ module ToolForge
           required_params << param_def[:name].to_s if param_def[:required]
         end
 
-        input_schema(
-          properties: properties,
-          required: required_params
-        )
+        schema_args = { properties: properties }
+        schema_args[:required] = required_params if required_params.any?
+        
+        input_schema(**schema_args)
 
         # Create a helper object that contains all the helper methods
         helper_class = Class.new do
