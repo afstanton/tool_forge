@@ -48,6 +48,12 @@ detectors:
   UncommunicativeVariableName:
     enabled: false
 
+  UncommunicativeMethodName:
+    enabled: false
+
+  UncommunicativeModuleName:
+    enabled: false
+
   UnusedParameters:
     enabled: false
 
