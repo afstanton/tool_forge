@@ -49,6 +49,9 @@ Rails/FilePath:
 Rails/I18nLocaleTexts:
   Enabled: false
 
+Rails/IndexBy:
+  Enabled: false
+
 Rails/RedundantPresenceValidationOnBelongsTo:
   Enabled: false
 
