@@ -233,7 +233,7 @@ module ToolForge
 
         schema_args = { properties: properties }
         schema_args[:required] = required_params if required_params.any?
-        
+
         input_schema(**schema_args)
 
         # Create a helper object that contains all the helper methods
