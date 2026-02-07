@@ -36,6 +36,9 @@ detectors:
   NilCheck:
     enabled: false
 
+  TooManyConstants:
+    enabled: false
+
   TooManyMethods:
     enabled: false
 
