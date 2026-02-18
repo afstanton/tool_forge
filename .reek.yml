@@ -36,6 +36,9 @@ detectors:
   NilCheck:
     enabled: false
 
+  RepeatedConditional:
+    enabled: false
+
   TooManyConstants:
     enabled: false
 
