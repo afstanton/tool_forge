@@ -23,3 +23,7 @@ Gemfile.lock
 .DS_Store
 
 spec/examples.txt
+
+*.log*
+
+/trove
