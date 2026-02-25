@@ -92,6 +92,46 @@ RSpec.describe ToolForge::ToolDefinition, '#to_mcp_tool' do
     expect(result2.content.first[:text]).to eq('Hi, Bob!')
   end
 
+  it 'passes optional context to execute when context keyword is declared' do
+    tool = described_class.new(:context_tool) do
+      description 'Reads context'
+      param :name, type: :string
+      execute do |name:, context: nil|
+        "#{name}-#{context.fetch(:workspace)}"
+      end
+    end
+
+    tool_class = tool.to_mcp_tool
+    result = tool_class.call(server_context: nil, context: { workspace: '/tmp/ws' }, name: 'Alice')
+    expect(result.content.first[:text]).to eq('Alice-/tmp/ws')
+  end
+
+  it 'uses server_context hash as fallback context for execute blocks' do
+    tool = described_class.new(:server_context_tool) do
+      description 'Reads server context fallback'
+      param :name, type: :string
+      execute do |name:, context: nil|
+        "#{name}-#{context.fetch(:workspace)}"
+      end
+    end
+
+    tool_class = tool.to_mcp_tool
+    result = tool_class.call(server_context: { workspace: '/tmp/ws' }, name: 'Alice')
+    expect(result.content.first[:text]).to eq('Alice-/tmp/ws')
+  end
+
+  it 'remains backward compatible when context is passed but execute does not declare it' do
+    tool = described_class.new(:legacy_tool) do
+      description 'Legacy execute signature'
+      param :name, type: :string
+      execute { |name:| "Hello, #{name}!" }
+    end
+
+    tool_class = tool.to_mcp_tool
+    result = tool_class.call(server_context: nil, context: { workspace: '/tmp/ws' }, name: 'Alice')
+    expect(result.content.first[:text]).to eq('Hello, Alice!')
+  end
+
   it 'handles tools with multiple parameter types' do
     tool = described_class.new(:complex_tool) do
       description 'A complex tool'

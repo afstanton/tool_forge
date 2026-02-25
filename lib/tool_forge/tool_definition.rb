@@ -189,9 +189,9 @@ module ToolForge
           define_singleton_method(method_name, &method_block)
         end
 
-        define_method(:execute) do |**args|
-          # Execute the block in the context of this instance so helper methods are available
-          instance_exec(**args, &definition.execute_block)
+        define_method(:execute) do |context: nil, **args|
+          # Execute the block in the context of this instance so helper methods are available.
+          definition.send(:invoke_execute_block, self, args, context: context)
         end
       end
     end
@@ -248,14 +248,16 @@ module ToolForge
           end
         end
 
-        # rubocop:disable Lint/UnusedBlockArgument
-        define_singleton_method(:call) do |server_context:, **args|
+        define_singleton_method(:call) do |server_context:, context: nil, **args|
           # Create an instance of the helper class to provide context for helper methods
           helper_instance = helper_class.new
 
+          effective_context = context
+          effective_context = server_context if effective_context.nil? && server_context.is_a?(Hash)
+
           # Execute the block in the context of the helper instance so helper methods are available
           # For class methods, they'll be available on the helper_class itself
-          result = helper_instance.instance_exec(**args, &definition.execute_block)
+          result = definition.send(:invoke_execute_block, helper_instance, args, context: effective_context)
 
           # Smart formatting for different return types
           result_text = case result
@@ -269,8 +271,21 @@ module ToolForge
 
           MCP::Tool::Response.new([{ type: 'text', text: result_text }])
         end
-        # rubocop:enable Lint/UnusedBlockArgument
       end
+    end
+
+    private
+
+    def invoke_execute_block(receiver, args, context: nil)
+      kwargs = args.dup
+      kwargs[:context] = context if !context.nil? && execute_block_accepts_context?
+      receiver.instance_exec(**kwargs, &execute_block)
+    end
+
+    def execute_block_accepts_context?
+      execute_block.parameters.any? do |(kind, name)|
+        ((kind == :key) || (kind == :keyreq)) && (name == :context)
+      end || execute_block.parameters.any? { |(kind, _name)| kind == :keyrest }
     end
   end
 end

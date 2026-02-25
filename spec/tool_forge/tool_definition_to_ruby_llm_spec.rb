@@ -69,6 +69,35 @@ RSpec.describe ToolForge::ToolDefinition, '#to_ruby_llm_tool' do
     expect(instance.execute(name: 'Bob', greeting: 'Hi')).to eq('Hi, Bob!')
   end
 
+  it 'passes optional context to execute when context keyword is declared' do
+    tool = described_class.new(:context_tool) do
+      description 'Reads context'
+      param :name, type: :string
+      execute do |name:, context: nil|
+        "#{name}-#{context.fetch(:workspace)}"
+      end
+    end
+
+    tool_class = tool.to_ruby_llm_tool
+    instance = tool_class.new
+
+    result = instance.execute(name: 'Alice', context: { workspace: '/tmp/ws' })
+    expect(result).to eq('Alice-/tmp/ws')
+  end
+
+  it 'remains backward compatible when context is passed but execute does not declare it' do
+    tool = described_class.new(:legacy_tool) do
+      description 'Legacy execute signature'
+      param :name, type: :string
+      execute { |name:| "Hello, #{name}!" }
+    end
+
+    tool_class = tool.to_ruby_llm_tool
+    instance = tool_class.new
+
+    expect(instance.execute(name: 'Alice', context: { workspace: '/tmp/ws' })).to eq('Hello, Alice!')
+  end
+
   it 'handles tools with multiple parameter types' do
     tool = described_class.new(:complex_tool) do
       description 'A complex tool'
