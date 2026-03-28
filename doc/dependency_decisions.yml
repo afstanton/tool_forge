@@ -77,3 +77,21 @@
     :why:
     :versions: []
     :when: 2026-03-05 21:39:28.494890000 Z
+- - :permit
+  - Unicode-3.0
+  - :who:
+    :why:
+    :versions: []
+    :when: 2026-03-24 20:15:12.826653000 Z
+- - :permit
+  - zlib/libpng license
+  - :who:
+    :why:
+    :versions: []
+    :when: 2026-03-24 20:15:52.742700000 Z
+- - :approve
+  - fnv
+  - :who:
+    :why:
+    :versions: []
+    :when: 2026-03-24 20:17:07.386412000 Z
