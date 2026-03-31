@@ -44,6 +44,8 @@ PreCommit:
 
   Flay:
     enabled: true
+    exclude:
+      - '**/db/schema.rb'
 
   LicenseFinder:
     enabled: true
