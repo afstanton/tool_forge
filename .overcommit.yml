@@ -46,6 +46,7 @@ PreCommit:
     enabled: true
     exclude:
       - '**/db/schema.rb'
+      - '**/spec/**/*.rb'
 
   LicenseFinder:
     enabled: true
