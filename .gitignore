@@ -31,3 +31,4 @@ spec/examples.txt
 /.claude
 
 /target
+Gemfile.lock
